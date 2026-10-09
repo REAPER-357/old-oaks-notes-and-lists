@@ -1,0 +1,15 @@
+{
+  "name": "Old Oak Notes & Lists",
+  "short_name": "OldOaksNotesLists",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#ff9800",
+  "icons": [
+    {
+      "src": "small-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
