@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Old Oak Notes and Lists</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * {
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.5);
+            border-radius: 3px;
+        }
+        .dragging {
+            opacity: 0.5;
+            background: rgba(34, 197, 94, 0.1) !important;
+            border: 2px dashed #22c55e !important;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+        }
+        .accordion-content.open {
+            max-height: 1000px;
+            transition: max-height 0.4s ease-in;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col font-sans select-none">
+
+<header class="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <img src="small-icon.png" alt="Old Oak Logo" class="w-10 h-10 rounded-xl object-cover shadow-md">
+            <div>
+                <h1 class="font-bold text-lg leading-tight tracking-tight">Old Oak Notes & Lists</h1>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Organize your thoughts & tasks</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-2">
+            <button id="themeToggleBtn" aria-label="Toggle Theme" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300">
+                <i data-lucide="moon" class="w-5 h-5 dark:hidden"></i>
+                <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+            </button>
+            <button id="settingsBtn" aria-label="Open Settings" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300">
+                <i data-lucide="settings" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-5xl w-full mx-auto p-4 md:p-6 flex flex-col pb-24">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div class="flex bg-slate-200 dark:bg-slate-800 p-1 rounded-2xl w-full sm:w-auto">
+                <button id="tabNotes" class="flex-1 sm:flex-none px-5 py-2 rounded-xl font-medium text-sm flex items-center justify-center space-x-2 bg-white dark:bg-slate-900 shadow-sm text-emerald-600 dark:text-emerald-400">
+                    <i data-lucide="file-text" class="w-4 h-4"></i>
+                    <span>Notes</span>
+                </button>
+                <button id="tabLists" class="flex-1 sm:flex-none px-5 py-2 rounded-xl font-medium text-sm flex items-center justify-center space-x-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+                    <i data-lucide="check-square" class="w-4 h-4"></i>
+                    <span>To-Do Lists</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-3 mb-6 items-stretch md:items-center justify-between">
+            <div class="relative flex-1">
+                <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                <input type="text" id="searchInput" placeholder="Search notes or lists..." class="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm">
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <select id="sortSelect" aria-label="Sort options" class="px-3 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm cursor-pointer">
+                    <option value="date-desc">Newest First</option>
+                    <option value="date-asc">Oldest First</option>
+                    <option value="alpha-asc">Alphabetical (A-Z)</option>
+                    <option value="alpha-desc">Alphabetical (Z-A)</option>
+                </select>
+
+                <button id="selectModeBtn" class="px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center space-x-1.5 shadow-sm">
+                    <i data-lucide="check-square" class="w-4 h-4"></i>
+                    <span id="selectModeText">Select</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="multiActionBar" class="hidden bg-emerald-600 text-white p-3 rounded-2xl mb-6 flex items-center justify-between shadow-lg">
+            <div class="flex items-center space-x-2 text-sm font-medium pl-2">
+                <span id="selectedCountBadge" class="bg-white text-emerald-700 px-2 py-0.5 rounded-full font-bold text-xs">0</span>
+                <span>items selected</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <select id="bulkMoveFolderSelect" aria-label="Move selected items to folder" class="px-3 py-1.5 rounded-xl bg-emerald-700 text-white text-sm border border-emerald-500 focus:outline-none">
+                    <option value="">Move to Folder...</option>
+                    <option value="none">Root (No Folder)</option>
+                </select>
+                <button id="bulkDeleteBtn" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-xl flex items-center space-x-1 shadow">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    <span>Delete</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="mainContentArea" class="space-y-6">
+            <!-- Favorites Section (Top) -->
+            <div id="favoritesSection" class="space-y-2">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center space-x-1.5">
+                    <i data-lucide="star" class="w-3.5 h-3.5 text-amber-400 fill-amber-400"></i>
+                    <span>Favorites</span>
+                </h2>
+                <div id="favoritesList" class="space-y-1.5">
+                    <!-- Favorites injected here -->
+                </div>
+            </div>
+
+            <!-- Folders Section with Accordion Slide-Down Support -->
+            <div id="foldersSection" class="space-y-2">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center space-x-1.5">
+                        <i data-lucide="folder" class="w-3.5 h-3.5"></i>
+                        <span>Folders</span>
+                    </h2>
+                    <button id="createFolderBtn" class="text-xs text-emerald-600 dark:text-emerald-400 hover:underline font-semibold flex items-center space-x-1">
+                        <i data-lucide="folder-plus" class="w-3.5 h-3.5"></i>
+                        <span>New Folder</span>
+                    </button>
+                </div>
+                <div id="foldersList" class="space-y-2">
+                    <!-- Folders injected here -->
+                </div>
+            </div>
+
+            <!-- Root / Unfoldered Items List View -->
+            <div class="space-y-2 pt-2">
+                <div class="flex items-center justify-between">
+                    <h2 id="itemsListTitle" class="text-xs font-bold uppercase tracking-wider text-slate-400">Root Items</h2>
+                </div>
+                <div id="itemsContainer" class="space-y-1.5">
+                    <!-- Root items injected here -->
+                </div>
+            </div>
+        </div>
+
+        <div id="emptyState" class="hidden flex flex-col items-center justify-center py-16 text-center">
+            <div class="bg-slate-100 dark:bg-slate-800 p-4 rounded-full text-slate-400 mb-3">
+                <i data-lucide="folder-open" class="w-10 h-10"></i>
+            </div>
+            <h3 class="font-bold text-base mb-1">No items found</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 max-w-xs mb-4">Create your first note or list using the floating button below!</p>
+        </div>
+    </main>
+
+    <div class="fixed bottom-6 right-6 z-40">
+        <button id="fabCreateBtn" aria-label="Create New Item" class="bg-emerald-500 hover:bg-emerald-600 text-white p-4 rounded-full shadow-2xl shadow-emerald-500/50 flex items-center justify-center transform hover:scale-105 active:scale-95 transition-all">
+            <i data-lucide="plus" class="w-7 h-7"></i>
+        </button>
+    </div>
+
+    <div id="editorModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <h3 id="modalTitleText" class="font-bold text-lg">Create New</h3>
+                <button id="closeEditorBtn" aria-label="Close Editor" class="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto space-y-4 flex-1">
+                <input type="hidden" id="editItemId">
+                <input type="hidden" id="editItemType" value="note">
+                
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Title</label>
+                    <input type="text" id="itemTitleInput" placeholder="Give it a title..." class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Folder</label>
+                        <select id="itemFolderSelect" aria-label="Select Folder" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <option value="">No Folder (Root)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Accent Color</label>
+                        <select id="itemTagSelect" aria-label="Select Accent Color" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <option value="emerald">Emerald</option>
+                            <option value="blue">Blue</option>
+                            <option value="purple">Purple</option>
+                            <option value="amber">Amber</option>
+                            <option value="rose">Rose</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="noteBodySection" class="space-y-1.5">
+                    <div class="flex items-center justify-between">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400">Note Content</label>
+                        <span id="wordCountBadge" class="text-xs text-slate-400">0 words</span>
+                    </div>
+                    <textarea id="itemContentInput" rows="6" placeholder="Write your note here..." class="w-full p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-y"></textarea>
+                </div>
+
+                <div id="listBodySection" class="space-y-3 hidden">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-400">Checklist Items</label>
+                    <div id="checklistItemInputs" class="space-y-2"></div>
+                    <button type="button" id="addChecklistRowBtn" class="text-xs text-emerald-600 dark:text-emerald-400 hover:underline font-semibold flex items-center space-x-1 pt-1">
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                        <span>Add Task Item</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end space-x-3 bg-slate-50 dark:bg-slate-900/50">
+                <button id="cancelEditorBtn" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800">Cancel</button>
+                <button id="saveItemBtn" class="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium shadow-lg shadow-emerald-500/30">Save Item</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="folderModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <h3 class="font-bold text-base">New Folder</h3>
+                <button id="closeFolderModalBtn" aria-label="Close Folder Modal" class="p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Folder Name</label>
+                    <input type="text" id="folderNameInput" placeholder="e.g. Work, Ideas..." class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium">
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end space-x-3 bg-slate-50 dark:bg-slate-900/50">
+                <button id="cancelFolderBtn" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400">Cancel</button>
+                <button id="saveFolderBtn" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium shadow">Create Folder</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="settingsModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-md rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <h3 class="font-bold text-base flex items-center space-x-2">
+                    <i data-lucide="settings" class="w-5 h-5 text-emerald-500"></i>
+                    <span>Settings</span>
+                </h3>
+                <button id="closeSettingsBtn" aria-label="Close Settings" class="p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-6 flex-1 overflow-y-auto">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="font-semibold text-sm">Dark Mode</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Switch between light and dark themes</p>
+                    </div>
+                    <button id="settingsThemeToggle" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 text-sm font-medium bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700">
+                        Toggle Theme
+                    </button>
+                </div>
+
+                <hr class="border-slate-200 dark:border-slate-800">
+
+                <div class="space-y-2">
+                    <h4 class="font-semibold text-sm">Export Data</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Download all notes, lists, and folders as a JSON backup.</p>
+                    <button id="exportDataBtn" class="w-full py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-sm font-medium flex items-center justify-center space-x-2">
+                        <i data-lucide="download" class="w-4 h-4 text-emerald-500"></i>
+                        <span>Export JSON Backup</span>
+                    </button>
+                </div>
+
+                <hr class="border-slate-200 dark:border-slate-800">
+
+                <div class="space-y-2">
+                    <h4 class="font-semibold text-sm">Import Data (Safe Merge)</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Upload a JSON backup. Existing IDs are preserved; new items are merged safely.</p>
+                    <label class="w-full py-2.5 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-emerald-500 cursor-pointer text-sm font-medium flex items-center justify-center space-x-2 bg-slate-50 dark:bg-slate-800/50">
+                        <i data-lucide="upload" class="w-4 h-4 text-emerald-500"></i>
+                        <span>Select JSON File to Merge</span>
+                        <input type="file" id="importFileInput" accept=".json" class="hidden">
+                    </label>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 text-center">
+                <p class="text-xs font-bold text-slate-400 tracking-wider">Made by REAPER-357</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastContainer" class="fixed bottom-20 right-6 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+<!-- Footer Branding Section -->
+  <footer class="mt-auto pt-8 pb-24 flex flex-col items-center justify-center text-center border-t border-gray-200 dark:border-gray-800">
+    <img src="icon.png" alt="Old Oak Notes and Lists Logo" class="w-40 h-40 rounded-2xl object-cover shadow-lg mb-3 border border-gray-300 dark:border-gray-700">
+    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Made by REAPER-357</p>
+  </footer>
+
+    <script>
+        let appData = {
+            folders: JSON.parse(localStorage.getItem('reaper_notes_folders')) || [
+                { id: 'f-1', name: 'Work' },
+                { id: 'f-2', name: 'Personal' }
+            ],
+            items: JSON.parse(localStorage.getItem('reaper_notes_items')) || [
+                { id: 'i-1', type: 'note', title: 'Welcome to Old Oak Notes & Lists!', content: 'Organize your thoughts easily. Drag and drop into folders, star favorites, and keep everything in sync.', folderId: 'f-1', favorite: true, tag: 'emerald', date: Date.now() - 100000 },
+                { id: 'i-2', type: 'list', title: 'Weekly Groceries', folderId: 'f-2', favorite: false, tag: 'blue', date: Date.now() - 50000, tasks: [{text: 'Apples', done: true}, {text: 'Milk', done: false}, {text: 'Coffee Beans', done: false}] }
+            ]
+        };
+
+        // Keep track of which folders are expanded open in accordion view
+        let openFolderIds = new Set();
+        let currentTab = 'notes';
+        let isSelectMode = false;
+        let selectedItemIds = new Set();
+        let searchQuery = '';
+        let currentSort = 'date-desc';
+
+        function refreshIcons() {
+            lucide.createIcons();
+        }
+
+        function saveData() {
+            localStorage.setItem('reaper_notes_folders', JSON.stringify(appData.folders));
+            localStorage.setItem('reaper_notes_items', JSON.stringify(appData.items));
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `px-4 py-3 rounded-2xl shadow-xl text-sm font-medium text-white flex items-center space-x-2 pointer-events-auto transform translate-y-2 opacity-0 transition-all duration-300 ${type === 'success' ? 'bg-emerald-600' : 'bg-slate-800'}`;
+            toast.innerHTML = `<i data-lucide="${type === 'success' ? 'check-circle-2' : 'info'}" class="w-4 h-4"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            refreshIcons();
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const settingsThemeToggle = document.getElementById('settingsThemeToggle');
+        
+        function setTheme(isDark) {
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('reaper_theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('reaper_theme', 'light');
+            }
+        }
+
+        // Changed default fallback from 'light' to 'dark'
+        const savedTheme = localStorage.getItem('reaper_theme') || 'dark';
+        setTheme(savedTheme === 'dark');
+
+        themeToggleBtn.addEventListener('click', () => setTheme(!document.documentElement.classList.contains('dark')));
+        settingsThemeToggle.addEventListener('click', () => setTheme(!document.documentElement.classList.contains('dark')));
+
+        const tabNotes = document.getElementById('tabNotes');
+        const tabLists = document.getElementById('tabLists');
+        const searchInput = document.getElementById('searchInput');
+        const sortSelect = document.getElementById('sortSelect');
+        const selectModeBtn = document.getElementById('selectModeBtn');
+        const selectModeText = document.getElementById('selectModeText');
+        const multiActionBar = document.getElementById('multiActionBar');
+        const selectedCountBadge = document.getElementById('selectedCountBadge');
+        const bulkMoveFolderSelect = document.getElementById('bulkMoveFolderSelect');
+        const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+        const foldersSection = document.getElementById('foldersSection');
+        const favoritesSection = document.getElementById('favoritesSection');
+        const foldersList = document.getElementById('foldersList');
+        const favoritesList = document.getElementById('favoritesList');
+        const itemsContainer = document.getElementById('itemsContainer');
+        const itemsListTitle = document.getElementById('itemsListTitle');
+        const emptyState = document.getElementById('emptyState');
+        const fabCreateBtn = document.getElementById('fabCreateBtn');
+
+        tabNotes.addEventListener('click', () => {
+            currentTab = 'notes';
+            tabNotes.className = "flex-1 sm:flex-none px-5 py-2 rounded-xl font-medium text-sm flex items-center justify-center space-x-2 bg-white dark:bg-slate-900 shadow-sm text-emerald-600 dark:text-emerald-400";
+            tabLists.className = "flex-1 sm:flex-none px-5 py-2 rounded-xl font-medium text-sm flex items-center justify-center space-x-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
+            render();
+        });
+
+        tabLists.addEventListener('click', () => {
+            currentTab = 'lists';
+            tabLists.className = "flex-1 sm:flex-none px-5 py-2 rounded-xl font-medium text-sm flex items-center justify-center space-x-2 bg-white dark:bg-slate-900 shadow-sm text-emerald-600 dark:text-emerald-400";
+            tabNotes.className = "flex-1 sm:flex-none px-5 py-2 rounded-xl font-medium text-sm flex items-center justify-center space-x-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
+            render();
+        });
+
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value.toLowerCase();
+            render();
+        });
+
+        sortSelect.addEventListener('change', (e) => {
+            currentSort = e.target.value;
+            render();
+        });
+
+        selectModeBtn.addEventListener('click', () => {
+            isSelectMode = !isSelectMode;
+            selectedItemIds.clear();
+            if (isSelectMode) {
+                selectModeBtn.className = "px-4 py-2.5 rounded-2xl border border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-sm font-medium flex items-center space-x-1.5 shadow-sm";
+                selectModeText.textContent = "Cancel Select";
+                multiActionBar.classList.remove('hidden');
+            } else {
+                selectModeBtn.className = "px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center space-x-1.5 shadow-sm";
+                selectModeText.textContent = "Select";
+                multiActionBar.classList.add('hidden');
+            }
+            render();
+        });
+
+        bulkDeleteBtn.addEventListener('click', () => {
+            if (selectedItemIds.size === 0) return;
+            if (confirm(`Delete ${selectedItemIds.size} selected items?`)) {
+                appData.items = appData.items.filter(item => !selectedItemIds.has(item.id));
+                selectedItemIds.clear();
+                saveData();
+                showToast("Selected items deleted");
+                render();
+            }
+        });
+
+        bulkMoveFolderSelect.addEventListener('change', (e) => {
+            const targetFolder = e.target.value;
+            if (selectedItemIds.size === 0 || !targetFolder) return;
+            const folderIdVal = targetFolder === 'none' ? null : targetFolder;
+            
+            appData.items.forEach(item => {
+                if (selectedItemIds.has(item.id)) {
+                    item.folderId = folderIdVal;
+                }
+            });
+            selectedItemIds.clear();
+            saveData();
+            showToast("Moved selected items successfully");
+            bulkMoveFolderSelect.value = "";
+            render();
+        });
+
+        function sortItems(arr) {
+            return arr.sort((a, b) => {
+                if (currentSort === 'date-desc') return b.date - a.date;
+                if (currentSort === 'date-asc') return a.date - b.date;
+                if (currentSort === 'alpha-asc') return a.title.localeCompare(b.title);
+                if (currentSort === 'alpha-desc') return b.title.localeCompare(a.title);
+            });
+        }
+
+        function render() {
+            updateFolderDropdowns();
+
+            // Filter items by current active tab (Notes or To-Do Lists)
+            let tabFiltered = appData.items.filter(item => item.type === (currentTab === 'notes' ? 'note' : 'list'));
+
+            if (searchQuery) {
+                tabFiltered = tabFiltered.filter(item => 
+                    item.title.toLowerCase().includes(searchQuery) || 
+                    (item.content && item.content.toLowerCase().includes(searchQuery)) ||
+                    (item.tasks && item.tasks.some(t => t.text.toLowerCase().includes(searchQuery)))
+                );
+            }
+
+            sortItems(tabFiltered);
+
+            // Render Favorites Section
+            favoritesList.innerHTML = '';
+            const favorites = tabFiltered.filter(i => i.favorite);
+            if (favorites.length > 0) {
+                favoritesSection.style.display = 'block';
+                favorites.forEach(item => {
+                    favoritesList.appendChild(createCompactItemRow(item, true));
+                });
+            } else {
+                favoritesSection.style.display = 'none';
+            }
+
+            // Render Folders Section with Accordion Slide-Down Content
+            foldersList.innerHTML = '';
+            if (appData.folders.length === 0) {
+                foldersList.innerHTML = `<p class="text-xs text-slate-400 py-1">No folders created yet.</p>`;
+            } else {
+                appData.folders.forEach(folder => {
+                    const folderItems = sortItems(tabFiltered.filter(i => i.folderId === folder.id));
+                    const isOpen = openFolderIds.has(folder.id);
+
+                    const folderWrapper = document.createElement('div');
+                    folderWrapper.className = "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden transition-all";
+                    
+                    folderWrapper.innerHTML = `
+                        <div class="px-3 py-2.5 flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 group folder-header" data-id="${folder.id}">
+                            <div class="flex items-center space-x-3 overflow-hidden flex-1">
+                                <div class="bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 p-2 rounded-xl group-hover:bg-emerald-500 group-hover:text-white transition-all flex-shrink-0">
+                                    <i data-lucide="${isOpen ? 'folder-open' : 'folder'}" class="w-4 h-4"></i>
+                                </div>
+                                <div class="truncate flex items-center space-x-2">
+                                    <span class="font-semibold text-sm truncate">${escapeHtml(folder.name)}</span>
+                                    <span class="text-xs text-slate-400">(${folderItems.length})</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-1 flex-shrink-0">
+                                <button class="text-slate-400 hover:text-red-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity delete-folder-btn" data-id="${folder.id}" title="Delete Folder">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                                <i data-lucide="${isOpen ? 'chevron-down' : 'chevron-right'}" class="w-4 h-4 text-slate-400"></i>
+                            </div>
+                        </div>
+                        <div class="accordion-content ${isOpen ? 'open' : ''} bg-slate-50/50 dark:bg-slate-950/30 px-3 border-t border-slate-100 dark:border-slate-800/50">
+                            <div class="py-2 space-y-1.5 folder-items-container" data-folder-id="${folder.id}">
+                                <!-- Folder items injected here -->
+                            </div>
+                        </div>
+                    `;
+
+                    // Drag and drop target for folder
+                    folderWrapper.addEventListener('dragover', (e) => e.preventDefault());
+                    folderWrapper.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        const itemId = e.dataTransfer.getData('text/plain');
+                        if (itemId) {
+                            const item = appData.items.find(i => i.id === itemId);
+                            if (item) {
+                                item.folderId = folder.id;
+                                saveData();
+                                showToast(`Moved to ${folder.name}`);
+                                render();
+                            }
+                        }
+                    });
+
+                    // Toggle accordion open/close on click
+                    folderWrapper.querySelector('.folder-header').addEventListener('click', (e) => {
+                        if (e.target.closest('.delete-folder-btn')) return;
+                        if (openFolderIds.has(folder.id)) {
+                            openFolderIds.delete(folder.id);
+                        } else {
+                            openFolderIds.add(folder.id);
+                        }
+                        render();
+                    });
+
+                    // Render items inside the accordion drawer
+                    const container = folderWrapper.querySelector('.folder-items-container');
+                    if (folderItems.length === 0) {
+                        container.innerHTML = `<p class="text-xs text-slate-400 py-1.5 text-center italic">Folder is empty. Drag items here.</p>`;
+                    } else {
+                        folderItems.forEach(item => {
+                            container.appendChild(createCompactItemRow(item, false));
+                        });
+                    }
+
+                    foldersList.appendChild(folderWrapper);
+                });
+
+                document.querySelectorAll('.delete-folder-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const id = btn.getAttribute('data-id');
+                        if (confirm("Delete folder? Items inside will be moved to Root.")) {
+                            appData.folders = appData.folders.filter(f => f.id !== id);
+                            appData.items.forEach(i => { if (i.folderId === id) i.folderId = null; });
+                            saveData();
+                            showToast("Folder deleted");
+                            render();
+                        }
+                    });
+                });
+            }
+
+            // Render Root Items (Items without a folder)
+            itemsContainer.innerHTML = '';
+            const rootItems = tabFiltered.filter(i => !i.folderId);
+            itemsListTitle.textContent = currentTab === 'notes' ? 'Root Notes' : 'Root To-Do Lists';
+
+            if (rootItems.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                rootItems.forEach(item => {
+                    itemsContainer.appendChild(createCompactItemRow(item, false));
+                });
+            }
+
+            refreshIcons();
+        }
+
+        // Ultra-compact single-line item row (Title, Star, Delete only — no secondary snippet text)
+        function createCompactItemRow(item, isFavList = false) {
+            const row = document.createElement('div');
+            const isSelected = selectedItemIds.has(item.id);
+            row.className = `bg-white dark:bg-slate-900 border ${isSelected ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20' : 'border-slate-200 dark:border-slate-800'} px-3 py-2 rounded-2xl shadow-sm flex items-center justify-between group hover:border-emerald-500 transition-all cursor-pointer`;
+            row.setAttribute('draggable', 'true');
+
+            row.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', item.id);
+                row.classList.add('dragging');
+            });
+            row.addEventListener('dragend', () => row.classList.remove('dragging'));
+
+            row.innerHTML = `
+                <div class="flex items-center space-x-3 overflow-hidden flex-1">
+                    ${isSelectMode ? `
+                        <input type="checkbox" ${isSelected ? 'checked' : ''} class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500 cursor-pointer select-checkbox flex-shrink-0" data-id="${item.id}">
+                    ` : ''}
+                    <div class="bg-${item.tag || 'emerald'}-100 dark:bg-${item.tag || 'emerald'}-950 text-${item.tag || 'emerald'}-600 dark:text-${item.tag || 'emerald'}-400 p-1.5 rounded-xl flex-shrink-0">
+                        <i data-lucide="${item.type === 'note' ? 'file-text' : 'check-square'}" class="w-4 h-4"></i>
+                    </div>
+                    <span class="font-semibold text-sm truncate flex-1">${escapeHtml(item.title)}</span>
+                </div>
+
+                <div class="flex items-center space-x-1 flex-shrink-0 ml-3">
+                    <button class="p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-amber-400 star-btn" data-id="${item.id}" title="Toggle Favorite">
+                        <i data-lucide="star" class="w-4 h-4 ${item.favorite ? 'fill-amber-400 text-amber-400' : 'text-slate-300 dark:text-slate-700'}"></i>
+                    </button>
+                    <button class="p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-red-500 delete-item-btn" data-id="${item.id}" title="Delete">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            `;
+
+            row.addEventListener('click', (e) => {
+                if (e.target.closest('.star-btn') || e.target.closest('.delete-item-btn') || e.target.closest('.select-checkbox')) return;
+                if (isSelectMode) {
+                    if (selectedItemIds.has(item.id)) selectedItemIds.delete(item.id);
+                    else selectedItemIds.add(item.id);
+                    selectedCountBadge.textContent = selectedItemIds.size;
+                    render();
+                } else {
+                    openEditorModal(item);
+                }
+            });
+
+            const chk = row.querySelector('.select-checkbox');
+            if (chk) {
+                chk.addEventListener('change', () => {
+                    if (chk.checked) selectedItemIds.add(item.id);
+                    else selectedItemIds.delete(item.id);
+                    selectedCountBadge.textContent = selectedItemIds.size;
+                    render();
+                });
+            }
+
+            row.querySelector('.star-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                item.favorite = !item.favorite;
+                saveData();
+                render();
+            });
+
+            row.querySelector('.delete-item-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (confirm("Delete this item?")) {
+                    appData.items = appData.items.filter(i => i.id !== item.id);
+                    saveData();
+                    showToast("Item deleted");
+                    render();
+                }
+            });
+
+            return row;
+        }
+
+        function updateFolderDropdowns() {
+            const selects = [document.getElementById('itemFolderSelect'), bulkMoveFolderSelect];
+            selects.forEach(sel => {
+                if (!sel) return;
+                const currentVal = sel.value;
+                if (sel === bulkMoveFolderSelect) {
+                    sel.innerHTML = `<option value="">Move to Folder...</option><option value="none">Root (No Folder)</option>`;
+                } else {
+                    sel.innerHTML = `<option value="">No Folder (Root)</option>`;
+                }
+                appData.folders.forEach(f => {
+                    const opt = document.createElement('option');
+                    opt.value = f.id;
+                    opt.textContent = f.name;
+                    sel.appendChild(opt);
+                });
+                sel.value = currentVal;
+            });
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        const editorModal = document.getElementById('editorModal');
+        const closeEditorBtn = document.getElementById('closeEditorBtn');
+        const cancelEditorBtn = document.getElementById('cancelEditorBtn');
+        const saveItemBtn = document.getElementById('saveItemBtn');
+        const modalTitleText = document.getElementById('modalTitleText');
+        const editItemId = document.getElementById('editItemId');
+        const editItemType = document.getElementById('editItemType');
+        const itemTitleInput = document.getElementById('itemTitleInput');
+        const itemFolderSelect = document.getElementById('itemFolderSelect');
+        const itemTagSelect = document.getElementById('itemTagSelect');
+        const noteBodySection = document.getElementById('noteBodySection');
+        const itemContentInput = document.getElementById('itemContentInput');
+        const wordCountBadge = document.getElementById('wordCountBadge');
+        const listBodySection = document.getElementById('listBodySection');
+        const checklistItemInputs = document.getElementById('checklistItemInputs');
+        const addChecklistRowBtn = document.getElementById('addChecklistRowBtn');
+
+        itemContentInput.addEventListener('input', () => {
+            const text = itemContentInput.value.trim();
+            const words = text ? text.split(/\s+/).length : 0;
+            wordCountBadge.textContent = `${words} word${words === 1 ? '' : 's'}`;
+        });
+
+        fabCreateBtn.addEventListener('click', () => {
+            openEditorModal(null, currentTab === 'notes' ? 'note' : 'list');
+        });
+
+        function openEditorModal(item = null, defaultType = 'note') {
+            editorModal.classList.remove('hidden');
+            if (item) {
+                modalTitleText.textContent = `Edit ${item.type === 'note' ? 'Note' : 'To-Do List'}`;
+                editItemId.value = item.id;
+                editItemType.value = item.type;
+                itemTitleInput.value = item.title;
+                itemFolderSelect.value = item.folderId || '';
+                itemTagSelect.value = item.tag || 'emerald';
+
+                if (item.type === 'note') {
+                    noteBodySection.classList.remove('hidden');
+                    listBodySection.classList.add('hidden');
+                    itemContentInput.value = item.content || '';
+                    itemContentInput.dispatchEvent(new Event('input'));
+                } else {
+                    noteBodySection.classList.add('hidden');
+                    listBodySection.classList.remove('hidden');
+                    renderChecklistInputs(item.tasks || []);
+                }
+            } else {
+                modalTitleText.textContent = `Create New ${defaultType === 'note' ? 'Note' : 'To-Do List'}`;
+                editItemId.value = '';
+                editItemType.value = defaultType;
+                itemTitleInput.value = '';
+                itemFolderSelect.value = '';
+                itemTagSelect.value = 'emerald';
+
+                if (defaultType === 'note') {
+                    noteBodySection.classList.remove('hidden');
+                    listBodySection.classList.add('hidden');
+                    itemContentInput.value = '';
+                    wordCountBadge.textContent = '0 words';
+                } else {
+                    noteBodySection.classList.add('hidden');
+                    listBodySection.classList.remove('hidden');
+                    renderChecklistInputs([{ text: '', done: false }]);
+                }
+            }
+            itemTitleInput.focus();
+        }
+
+        function renderChecklistInputs(tasks) {
+            checklistItemInputs.innerHTML = '';
+            tasks.forEach((task) => {
+                const div = document.createElement('div');
+                div.className = "flex items-center space-x-2";
+                div.innerHTML = `
+                    <input type="checkbox" ${task.done ? 'checked' : ''} class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500 cursor-pointer task-checkbox-input">
+                    <input type="text" value="${escapeHtml(task.text)}" placeholder="Task item..." class="flex-1 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 task-text-input">
+                    <button type="button" class="p-2 text-slate-400 hover:text-red-500 remove-task-btn" aria-label="Remove Task">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                `;
+                div.querySelector('.remove-task-btn').addEventListener('click', () => div.remove());
+                checklistItemInputs.appendChild(div);
+            });
+            refreshIcons();
+        }
+
+        addChecklistRowBtn.addEventListener('click', () => {
+            const div = document.createElement('div');
+            div.className = "flex items-center space-x-2";
+            div.innerHTML = `
+                <input type="checkbox" class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500 cursor-pointer task-checkbox-input">
+                <input type="text" placeholder="Task item..." class="flex-1 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 task-text-input">
+                <button type="button" class="p-2 text-slate-400 hover:text-red-500 remove-task-btn" aria-label="Remove Task">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            `;
+            div.querySelector('.remove-task-btn').addEventListener('click', () => div.remove());
+            checklistItemInputs.appendChild(div);
+            refreshIcons();
+        });
+
+        function closeEditor() {
+            editorModal.classList.add('hidden');
+        }
+
+        closeEditorBtn.addEventListener('click', closeEditor);
+        cancelEditorBtn.addEventListener('click', closeEditor);
+
+        saveItemBtn.addEventListener('click', () => {
+            const id = editItemId.value;
+            const type = editItemType.value;
+            const title = itemTitleInput.value.trim();
+            const folderId = itemFolderSelect.value || null;
+            const tag = itemTagSelect.value;
+
+            if (!title) {
+                showToast("Please enter a title", "info");
+                itemTitleInput.focus();
+                return;
+            }
+
+            if (id) {
+                const item = appData.items.find(i => i.id === id);
+                if (item) {
+                    item.title = title;
+                    item.folderId = folderId;
+                    item.tag = tag;
+                    item.date = Date.now();
+                    if (type === 'note') {
+                        item.content = itemContentInput.value;
+                    } else {
+                        const taskRows = checklistItemInputs.querySelectorAll('div');
+                        const tasks = [];
+                        taskRows.forEach(row => {
+                            const text = row.querySelector('.task-text-input').value.trim();
+                            const done = row.querySelector('.task-checkbox-input').checked;
+                            if (text) tasks.push({ text, done });
+                        });
+                        item.tasks = tasks;
+                    }
+                }
+                showToast("Updated successfully");
+            } else {
+                const newItem = {
+                    id: 'item-' + Date.now() + '-' + Math.random().toString(36).substring(2, 9),
+                    type,
+                    title,
+                    folderId,
+                    tag,
+                    favorite: false,
+                    date: Date.now()
+                };
+                if (type === 'note') {
+                    newItem.content = itemContentInput.value;
+                } else {
+                    const taskRows = checklistItemInputs.querySelectorAll('div');
+                    const tasks = [];
+                    taskRows.forEach(row => {
+                        const text = row.querySelector('.task-text-input').value.trim();
+                        const done = row.querySelector('.task-checkbox-input').checked;
+                        if (text) tasks.push({ text, done });
+                    });
+                    newItem.tasks = tasks;
+                }
+                appData.items.push(newItem);
+                showToast("Created successfully");
+            }
+
+            saveData();
+            closeEditor();
+            render();
+        });
+
+        const folderModal = document.getElementById('folderModal');
+        const createFolderBtn = document.getElementById('createFolderBtn');
+        const closeFolderModalBtn = document.getElementById('closeFolderModalBtn');
+        const cancelFolderBtn = document.getElementById('cancelFolderBtn');
+        const saveFolderBtn = document.getElementById('saveFolderBtn');
+        const folderNameInput = document.getElementById('folderNameInput');
+
+        createFolderBtn.addEventListener('click', () => {
+            folderModal.classList.remove('hidden');
+            folderNameInput.value = '';
+            folderNameInput.focus();
+        });
+
+        function closeFolderModal() { folderModal.classList.add('hidden'); }
+        closeFolderModalBtn.addEventListener('click', closeFolderModal);
+        cancelFolderBtn.addEventListener('click', closeFolderModal);
+
+        saveFolderBtn.addEventListener('click', () => {
+            const name = folderNameInput.value.trim();
+            if (!name) {
+                showToast("Please enter a folder name", "info");
+                folderNameInput.focus();
+                return;
+            }
+            const newFolderId = 'folder-' + Date.now();
+            appData.folders.push({
+                id: newFolderId,
+                name
+            });
+            openFolderIds.add(newFolderId);
+            saveData();
+            closeFolderModal();
+            showToast("Folder created");
+            render();
+        });
+
+        const settingsModal = document.getElementById('settingsModal');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+        const exportDataBtn = document.getElementById('exportDataBtn');
+        const importFileInput = document.getElementById('importFileInput');
+
+        settingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
+        closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
+
+        exportDataBtn.addEventListener('click', () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `notes_and_lists_backup_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showToast("Backup exported successfully");
+        });
+
+        importFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const imported = JSON.parse(event.target.result);
+                    if (!imported.folders || !imported.items) {
+                        throw new Error("Invalid backup format");
+                    }
+
+                    const existingFolderIds = new Set(appData.folders.map(f => f.id));
+                    imported.folders.forEach(f => {
+                        if (!existingFolderIds.has(f.id)) {
+                            appData.folders.push(f);
+                        }
+                    });
+
+                    const existingItemIds = new Set(appData.items.map(i => i.id));
+                    let addedCount = 0;
+                    imported.items.forEach(item => {
+                        if (!existingItemIds.has(item.id)) {
+                            appData.items.push(item);
+                            addedCount++;
+                        }
+                    });
+
+                    saveData();
+                    settingsModal.classList.add('hidden');
+                    showToast(`Imported & safely merged ${addedCount} new items`);
+                    render();
+                } catch (err) {
+                    showToast("Error importing file. Invalid JSON.", "info");
+                }
+            };
+            reader.readAsText(file);
+            importFileInput.value = '';
+        });
+
+        window.onload = function() {
+            render();
+        };
+    </script>
+</body>
+</html>
